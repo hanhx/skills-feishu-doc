@@ -41,14 +41,29 @@ http://localhost:9999/callback
 
 ## 二、本地配置
 
-编辑 `assets/.feishu`，将 `cli_xxxx` 和 `xxxx` 替换为你的真实 App ID 和 App Secret：
+支持两种方式配置应用凭证，**环境变量优先**。
+
+### 方式1：环境变量（推荐）
+
+在 `~/.bash_profile`（或 `~/.zshrc`）中添加：
+
+```bash
+export FEISHU_APP_ID=cli_xxxx
+export FEISHU_APP_SECRET=xxxx
+```
+
+保存后执行 `source ~/.bash_profile` 生效。凭证不会进入代码仓库，安全可靠。
+
+### 方式2：配置文件
+
+编辑 `assets/.feishu`，填入你的凭证：
 
 ```
 app_id=cli_xxxx
 app_secret=xxxx
 ```
 
-仅需这两项，无需其他配置。
+> ⚠️ 如果你要提交到公开仓库，请使用方式1，避免泄露凭证。
 
 ---
 

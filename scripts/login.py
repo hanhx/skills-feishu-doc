@@ -19,6 +19,10 @@ REDIRECT_URI = f"http://localhost:{PORT}/callback"
 
 
 def get_config(key):
+    env_map = {"app_id": "FEISHU_APP_ID", "app_secret": "FEISHU_APP_SECRET"}
+    env_val = os.environ.get(env_map.get(key, ""), "")
+    if env_val:
+        return env_val
     if not os.path.isfile(FEISHU_FILE):
         return ""
     with open(FEISHU_FILE, "r") as f:
