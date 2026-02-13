@@ -1,3 +1,4 @@
 .DS_Store
 .idea/
+assets/.token_cache
 assets/.user_token_cache
