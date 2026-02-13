@@ -58,7 +58,7 @@ cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/index.py append "<Fe
 **前置步骤**：
 1. 在 https://open.feishu.cn/app 创建**企业自建应用**
 2. 申请权限：`docx:document:readonly`、`docx:document`
-3. 安全设置 → 重定向 URL → 添加 `http://localhost:9999/callback`
+3. 安全设置 → 重定向 URL → 添加 `http://127.0.0.1:9999/callback`
 4. 发布应用
 
 **首次登录**：

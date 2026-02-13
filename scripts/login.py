@@ -15,7 +15,7 @@ FEISHU_FILE = os.path.join(SCRIPT_DIR, "..", "assets", ".feishu")
 USER_TOKEN_CACHE = os.path.join(SCRIPT_DIR, "..", "assets", ".user_token_cache")
 API_BASE = "https://open.feishu.cn/open-apis"
 PORT = 9999
-REDIRECT_URI = f"http://localhost:{PORT}/callback"
+REDIRECT_URI = f"http://127.0.0.1:{PORT}/callback"
 
 
 def get_config(key):
@@ -62,7 +62,7 @@ def main():
     print("   ✅ docx:document          （读写文档）")
     print("   ✅ docx:document:readonly （只读文档）")
     print()
-    print(f"⚙️  安全设置 → 重定向 URL → 添加: http://localhost:{PORT}/callback")
+    print(f"⚙️  安全设置 → 重定向 URL → 添加: http://127.0.0.1:{PORT}/callback")
     print()
 
     authorization_code = [None]
@@ -93,12 +93,12 @@ def main():
         f"&scope=docx:document:readonly%20docx:document"
     )
 
-    server = http.server.HTTPServer(("localhost", PORT), CallbackHandler)
+    server = http.server.HTTPServer(("127.0.0.1", PORT), CallbackHandler)
     server.timeout = 120
 
     print("🌐 打开浏览器授权...")
     webbrowser.open(auth_url)
-    print(f"⏳ 等待授权回调 (http://localhost:{PORT}/callback) ...")
+    print(f"⏳ 等待授权回调 (http://127.0.0.1:{PORT}/callback) ...")
 
     server.handle_request()
     server.server_close()
