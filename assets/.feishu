@@ -1,0 +1,6 @@
+# 飞书开放平台应用凭证
+# 在 https://open.feishu.cn/app 创建企业自建应用后获取
+# 需要权限：docx:document, docx:document:readonly
+
+app_id=
+app_secret=
