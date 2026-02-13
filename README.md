@@ -59,7 +59,7 @@ app_secret=xxxx
 在 Windsurf 终端执行：
 
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && bash scripts/login.sh
+cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py
 ```
 
 脚本会：
@@ -75,7 +75,7 @@ cd ~/.codeium/windsurf/skills/feishu-doc && bash scripts/login.sh
 ### 退出登录
 
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && bash scripts/login.sh logout
+cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout
 ```
 
 ### 重新登录
@@ -83,7 +83,7 @@ cd ~/.codeium/windsurf/skills/feishu-doc && bash scripts/login.sh logout
 token 过期或需要切换账号时：
 
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && bash scripts/login.sh logout && bash scripts/login.sh
+cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout && python3 scripts/login.py
 ```
 
 ---
@@ -132,13 +132,13 @@ Cascade 会：
 检查：
 1. 应用是否已开通 `docx:document` 和 `docx:document:readonly` 权限
 2. 修改权限后是否重新发布了应用版本
-3. 是否重新运行了 `login.sh` 授权
+3. 是否重新运行了 `login.py` 授权
 
 ### Token 过期
 
 运行重新登录命令：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && bash scripts/login.sh logout && bash scripts/login.sh
+cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout && python3 scripts/login.py
 ```
 
 ### 表格超过 9 行
@@ -177,5 +177,5 @@ cd ~/.codeium/windsurf/skills/feishu-doc && bash scripts/login.sh logout && bash
 ### 团队共享建议
 
 1. **共享 app_id + app_secret**：团队成员使用同一份 `.feishu` 配置即可
-2. **各自登录**：每人运行 `login.sh` 完成个人授权，token 缓存互不影响
+2. **各自登录**：每人运行 `login.py` 完成个人授权，token 缓存互不影响
 3. **不共享 token 缓存**：`.user_token_cache` 文件仅限本人使用
