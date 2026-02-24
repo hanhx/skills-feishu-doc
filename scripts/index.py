@@ -817,33 +817,39 @@ def main():
     app_id = get_config("app_id")
     app_secret = get_config("app_secret")
 
-    # 优先使用 user_access_token
-    access_token = ""
-    if os.path.isfile(USER_TOKEN_CACHE):
-        access_token = get_user_access_token(app_id, app_secret)
+    # 必须使用 user_access_token（个人授权）
+    if not app_id or not app_secret:
+        print("❌ 未找到应用凭证，请先完成配置：", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   1️⃣  配置应用凭证（二选一）：", file=sys.stderr)
+        print("      方式A: 环境变量（推荐）", file=sys.stderr)
+        print("        export FEISHU_APP_ID=cli_xxxx", file=sys.stderr)
+        print("        export FEISHU_APP_SECRET=xxxx", file=sys.stderr)
+        print("      方式B: 编辑 assets/.feishu 文件", file=sys.stderr)
+        print("        app_id=cli_xxxx", file=sys.stderr)
+        print("        app_secret=xxxx", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   2️⃣  授权登录：", file=sys.stderr)
+        print("      python3 scripts/login.py", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   💡 没有 App ID？参考: https://github.com/hanhx/feishu-doc#readme", file=sys.stderr)
+        sys.exit(1)
 
-    # 回退到 tenant_access_token
+    if not os.path.isfile(USER_TOKEN_CACHE):
+        print("❌ 未登录，请先完成授权：", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   python3 scripts/login.py", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("   首次使用需在浏览器中完成飞书授权，之后 30 天内无需重复登录。", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("📖 完整配置指南: https://github.com/hanhx/feishu-doc#readme", file=sys.stderr)
+        sys.exit(1)
+
+    access_token = get_user_access_token(app_id, app_secret)
     if not access_token:
-        if not app_id or not app_secret:
-            print("❌ 未找到有效的认证信息，请先完成配置：", file=sys.stderr)
-            print("", file=sys.stderr)
-            print("   1️⃣  配置应用凭证（二选一）：", file=sys.stderr)
-            print("      方式A: 环境变量（推荐）", file=sys.stderr)
-            print("        export FEISHU_APP_ID=cli_xxxx", file=sys.stderr)
-            print("        export FEISHU_APP_SECRET=xxxx", file=sys.stderr)
-            print("      方式B: 编辑 assets/.feishu 文件", file=sys.stderr)
-            print("        app_id=cli_xxxx", file=sys.stderr)
-            print("        app_secret=xxxx", file=sys.stderr)
-            print("", file=sys.stderr)
-            print("   2️⃣  授权登录：", file=sys.stderr)
-            print("      python3 scripts/login.py", file=sys.stderr)
-            print("", file=sys.stderr)
-            print("   💡 没有 App ID？参考: https://github.com/hanhx/feishu-doc#readme", file=sys.stderr)
-            sys.exit(1)
-        access_token = get_access_token(app_id, app_secret)
-        if not access_token:
-            print("❌ 获取 access_token 失败", file=sys.stderr)
-            sys.exit(1)
+        print("❌ 获取 access_token 失败，请重新登录：", file=sys.stderr)
+        print("   python3 scripts/login.py logout && python3 scripts/login.py", file=sys.stderr)
+        sys.exit(1)
 
     # 执行操作
     process(action, doc_url, access_token, doc_type, token, content_file)
