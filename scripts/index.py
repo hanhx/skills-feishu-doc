@@ -677,69 +677,74 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                     # 先把当前 children 写入
                     flush_blocks(children)
                     children = []
-                    # 飞书 API 限制表格最多 9 行
-                    if row_size > 9:
-                        children.append(make_code_block("\n".join(table_lines), "markdown"))
-                    else:
-                        table_block = {
+                    # 大表格拆分：每个子表最多 8 行数据 + 1 行表头 = 9 行
+                    MAX_DATA_ROWS = 8
+                    from concurrent.futures import ThreadPoolExecutor
+
+                    def create_and_fill_table(h_cells, d_rows, c_size, c_widths):
+                        sub_row_size = 1 + len(d_rows)
+                        tb = {
                             "block_type": 31,
                             "table": {
                                 "property": {
-                                    "row_size": row_size,
-                                    "column_size": col_size,
-                                    "column_width": col_widths,
+                                    "row_size": sub_row_size,
+                                    "column_size": c_size,
+                                    "column_width": c_widths,
                                     "header_row": True,
                                 },
                             },
                         }
-                        t_resp = api_call(
+                        tr = api_call(
                             "POST",
                             f"/docx/v1/documents/{doc_token}/blocks/{page_block_id}/children",
                             access_token,
-                            {"children": [table_block], "index": -1},
+                            {"children": [tb], "index": -1},
                         )
-                        t_code = t_resp.get("code", -1)
-                        if t_code != 0:
-                            total_cells = row_size * col_size
+                        if tr.get("code", -1) != 0:
                             print(
-                                f"⚠️ 表格创建失败({row_size}x{col_size}={total_cells}), fallback代码块: {t_resp.get('msg', '')[:80]}",
+                                f"⚠️ 表格创建失败({sub_row_size}x{c_size}), fallback: {tr.get('msg', '')[:80]}",
                                 file=sys.stderr,
                             )
+                            return False
+                        counter[0] += 1
+                        tc = tr.get("data", {}).get("children", [])
+                        if tc:
+                            cids = tc[0].get("table", {}).get("cells", [])
+                            a_rows = [h_cells] + d_rows
+
+                            def fill_cell(args):
+                                cell_id, text, is_header = args
+                                el = make_plain_elements(text) if is_header else make_text_elements(text)
+                                cell_block = {"block_type": 2, "text": {"elements": el}}
+                                api_call(
+                                    "POST",
+                                    f"/docx/v1/documents/{doc_token}/blocks/{cell_id}/children",
+                                    access_token,
+                                    {"children": [cell_block], "index": 0},
+                                )
+
+                            tasks = []
+                            for ri, rc in enumerate(a_rows):
+                                for ci2 in range(c_size):
+                                    cidx = ri * c_size + ci2
+                                    if cidx >= len(cids):
+                                        break
+                                    ct = rc[ci2] if ci2 < len(rc) else ""
+                                    if not ct:
+                                        continue
+                                    tasks.append((cids[cidx], ct, ri == 0))
+                            with ThreadPoolExecutor(max_workers=5) as pool:
+                                pool.map(fill_cell, tasks)
+                        time.sleep(0.5)
+                        return True
+
+                    # 拆分数据行
+                    for chunk_start in range(0, len(data_rows), MAX_DATA_ROWS):
+                        chunk = data_rows[chunk_start:chunk_start + MAX_DATA_ROWS]
+                        if not create_and_fill_table(header_cells, chunk, col_size, col_widths):
+                            # fallback: 整个表格用代码块
                             children.append(make_code_block("\n".join(table_lines), "markdown"))
-                        else:
-                            t_data = t_resp.get("data", {})
-                            counter[0] += 1
-                            t_children = t_data.get("children", [])
-                            if t_children:
-                                table_info = t_children[0]
-                                cell_ids = table_info.get("table", {}).get("cells", [])
-                                all_rows = [header_cells] + data_rows
-                                from concurrent.futures import ThreadPoolExecutor
-
-                                def fill_cell(args):
-                                    cell_id, text, is_header = args
-                                    el = make_plain_elements(text) if is_header else make_text_elements(text)
-                                    cell_block = {"block_type": 2, "text": {"elements": el}}
-                                    api_call(
-                                        "POST",
-                                        f"/docx/v1/documents/{doc_token}/blocks/{cell_id}/children",
-                                        access_token,
-                                        {"children": [cell_block], "index": 0},
-                                    )
-
-                                tasks = []
-                                for ri, row_cells in enumerate(all_rows):
-                                    for ci in range(col_size):
-                                        cell_idx = ri * col_size + ci
-                                        if cell_idx >= len(cell_ids):
-                                            break
-                                        cell_text = row_cells[ci] if ci < len(row_cells) else ""
-                                        if not cell_text:
-                                            continue
-                                        tasks.append((cell_ids[cell_idx], cell_text, ri == 0))
-                                with ThreadPoolExecutor(max_workers=5) as pool:
-                                    pool.map(fill_cell, tasks)
-                            time.sleep(0.5)
+                            break
                 continue
 
             # 普通文本

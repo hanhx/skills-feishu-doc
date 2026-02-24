@@ -1,6 +1,6 @@
 ---
 name: feishu-doc
-description: Reads and writes Feishu/Lark wiki and docx documents via Open API (app_id/app_secret). Use when the user provides a Feishu document URL and needs to read or update its content. Run via python3 in terminal, do not open browser.
+description: Reads and writes Feishu/Lark wiki and docx documents via Open API (app_id/app_secret). Supports large tables (auto-split into ≤9-row native tables). Use when the user provides a Feishu document URL and needs to read or update its content. Run via python3 in terminal, do not open browser.
 ---
 
 # feishu-doc
@@ -125,6 +125,17 @@ app_secret=xxxx
   "status": "success"
 }
 ```
+
+## 写入支持的格式
+
+- 标题（H1~H9，第一个 H1 自动设为文档标题）
+- 代码块（自动识别 Java、SQL、JSON、Python、Go、Shell、mermaid 等语言）
+- 无序列表、有序列表
+- 待办事项（`- [ ]` / `- [x]`）
+- 引用（渲染为飞书 Callout 容器）
+- 表格（自动拆分为飞书原生表格，每个子表最多 8 行数据 + 1 行表头，大表格无缝支持）
+- 分割线
+- 行内样式：**加粗**、`行内代码`、~~删除线~~、[超链接](url)
 
 ## 前置条件
 
