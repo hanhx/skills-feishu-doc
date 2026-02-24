@@ -212,16 +212,35 @@ def check_resp(resp, action_name):
     if code != 0:
         msg = resp.get("msg") or resp.get("message") or "未知错误"
         print(f"❌ {action_name}失败 (code={code}): {msg}", file=sys.stderr)
+        print("", file=sys.stderr)
         if code in (99991668, 99991672, 99991679, 1770032):
+            print("📋 权限不足，请按以下步骤排查：", file=sys.stderr)
             print("", file=sys.stderr)
-            print("📋 权限不足，请检查以下配置（飞书开放平台 → 应用 → 权限管理）：", file=sys.stderr)
-            print("   1. 开通权限: docx:document + docx:document:readonly", file=sys.stderr)
-            print("   2. 发布应用版本（权限变更后需重新发布）", file=sys.stderr)
-            print("   3. 重新授权: python3 scripts/login.py", file=sys.stderr)
+            print("   1️⃣  确认飞书应用已开通权限", file=sys.stderr)
+            print("      打开 https://open.feishu.cn/app → 进入应用 → 权限管理", file=sys.stderr)
+            print("      搜索并开通: docx:document + docx:document:readonly", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("   2️⃣  重新发布应用版本", file=sys.stderr)
+            print("      版本管理与发布 → 创建版本 → 提交发布", file=sys.stderr)
+            print("      ⚠️ 每次改权限后都要重新发布，否则不生效", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("   3️⃣  重新授权登录", file=sys.stderr)
+            print("      python3 scripts/login.py logout && python3 scripts/login.py", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("   如果仍然失败，确认你对该文档有编辑权限（飞书中能正常打开和编辑）", file=sys.stderr)
         elif code == 99991663:
-            print("", file=sys.stderr)
-            print("🔑 Token 已过期，请重新登录:", file=sys.stderr)
-            print("   python3 scripts/login.py", file=sys.stderr)
+            print("🔑 Token 已过期，请重新登录：", file=sys.stderr)
+            print("   python3 scripts/login.py logout && python3 scripts/login.py", file=sys.stderr)
+        elif code == 99991664:
+            print("� Token 无效，可能未登录或缓存损坏，请重新登录：", file=sys.stderr)
+            print("   python3 scripts/login.py logout && python3 scripts/login.py", file=sys.stderr)
+        else:
+            print("💡 排查建议：", file=sys.stderr)
+            print("   1. 确认已运行 login.py 完成授权登录", file=sys.stderr)
+            print("   2. 确认飞书应用权限已开通并发布", file=sys.stderr)
+            print("   3. 重新登录: python3 scripts/login.py logout && python3 scripts/login.py", file=sys.stderr)
+        print("", file=sys.stderr)
+        print("📖 完整配置指南: https://github.com/hanhx/feishu-doc#readme", file=sys.stderr)
         sys.exit(1)
     return resp.get("data", {})
 
@@ -806,9 +825,20 @@ def main():
     # 回退到 tenant_access_token
     if not access_token:
         if not app_id or not app_secret:
-            print("❌ 未找到有效的认证信息", file=sys.stderr)
-            print("  方式1: 运行 login.py 进行个人授权（推荐）", file=sys.stderr)
-            print("  方式2: 在 ../assets/.feishu 配置 app_id + app_secret", file=sys.stderr)
+            print("❌ 未找到有效的认证信息，请先完成配置：", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("   1️⃣  配置应用凭证（二选一）：", file=sys.stderr)
+            print("      方式A: 环境变量（推荐）", file=sys.stderr)
+            print("        export FEISHU_APP_ID=cli_xxxx", file=sys.stderr)
+            print("        export FEISHU_APP_SECRET=xxxx", file=sys.stderr)
+            print("      方式B: 编辑 assets/.feishu 文件", file=sys.stderr)
+            print("        app_id=cli_xxxx", file=sys.stderr)
+            print("        app_secret=xxxx", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("   2️⃣  授权登录：", file=sys.stderr)
+            print("      python3 scripts/login.py", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("   💡 没有 App ID？参考: https://github.com/hanhx/feishu-doc#readme", file=sys.stderr)
             sys.exit(1)
         access_token = get_access_token(app_id, app_secret)
         if not access_token:
