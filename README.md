@@ -1,10 +1,42 @@
 # feishu-doc 使用说明
 
-让 Windsurf（Cascade）直接在终端读写飞书文档，无需打开浏览器。
+让 AI IDE（如 Windsurf、Cursor 等）直接在终端读写飞书文档，无需打开浏览器。
+
+**下载地址**：https://github.com/hanhx/feishu-doc
+
+---
+
+## 安装
+
+将项目克隆（或软链接）到 AI IDE 的 skills 目录即可。
+
+### Windsurf
+
+```bash
+git clone https://github.com/hanhx/feishu-doc.git ~/.codeium/windsurf/skills/feishu-doc
+```
+
+或者如果你已经克隆到其他位置，可以用软链接：
+
+```bash
+ln -s /path/to/feishu-doc ~/.codeium/windsurf/skills/feishu-doc
+```
+
+安装完成后，Windsurf 的 Cascade 会自动识别 `SKILL.md` 并加载该 skill。
+
+### Cursor
+
+```bash
+git clone https://github.com/hanhx/feishu-doc.git ~/.cursor/skills/feishu-doc
+```
+
+> 不同 IDE 的 skills 目录可能不同，请参考对应 IDE 的文档。
 
 ---
 
 ## 一、飞书应用配置
+
+> 💡 作者已注册好企业自建应用，如果你不想自己创建，可以直接联系作者获取 App ID 和 App Secret，跳过 1.1 ~ 1.4 步骤。
 
 ### 1.1 创建应用
 
@@ -21,7 +53,7 @@
 | `docx:document` | 查看、编辑和管理云文档 | ✅ |
 | `docx:document:readonly` | 查看云文档 | ✅ |
 
-> **读写权限与你的个人账号一致**：授权登录后，Cascade 使用你的身份访问飞书。你能看到的文档就能读，你能编辑的文档就能写，不需要额外给应用分享文档权限。
+> **读写权限与你的个人账号一致**：授权登录后，AI 助手使用你的身份访问飞书。你能看到的文档就能读，你能编辑的文档就能写，不需要额外给应用分享文档权限。
 
 ### 1.3 安全设置
 
@@ -71,7 +103,7 @@ app_secret=xxxx
 
 ### 首次登录
 
-在 Windsurf 终端执行：
+在终端执行：
 
 ```bash
 cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py
@@ -103,21 +135,21 @@ cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout && p
 
 ---
 
-## 四、如何让 Cascade 写飞书文档
+## 四、如何让 AI 助手写飞书文档
 
-授权完成后，你可以直接在 Windsurf 聊天中告诉 Cascade：
+授权完成后，你可以直接在 AI IDE 聊天中告诉 AI 助手：
 
 ### 读取文档
 
 > "帮我读一下这个飞书文档 https://xxx.feishu.cn/wiki/TOKEN"
 
-Cascade 会调用 skill 读取文档内容，返回 markdown 格式。
+AI 助手会调用 skill 读取文档内容，返回 markdown 格式。
 
 ### 写入文档
 
 > "帮我把这个方案写到 https://xxx.feishu.cn/wiki/TOKEN"
 
-Cascade 会：
+AI 助手会：
 1. 先确认是否清空文档（不会自动清空）
 2. 将内容转为飞书原生格式写入
 

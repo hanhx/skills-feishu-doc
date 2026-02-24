@@ -346,8 +346,11 @@ def make_text_block(text):
 
 
 def make_heading_block(level, text):
+    level = max(1, min(level, 9))
+    block_type = level + 2  # H1=3, H2=4, ..., H9=11
+    key = f"heading{level}"
     elements = [{"text_run": {"content": text, "text_element_style": {"bold": True}}}]
-    return {"block_type": 2, "text": {"elements": elements}}
+    return {"block_type": block_type, key: {"elements": elements}}
 
 
 def make_bullet_block(text):
