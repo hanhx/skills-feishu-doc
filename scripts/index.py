@@ -931,7 +931,12 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                                         access_token,
                                         {"children": [cell_block], "index": -1},
                                     )
+                                time.sleep(0.02)  # 适当延迟避免竞态条件
 
+                            # 批次并发执行：每批 num_workers 个单元格并发处理，批次之间串行
+                            # 确保第一批 [0,1,2,3,4] 全部完成后，再处理第二批 [5,6,7,8,9]
+                            num_workers = 5
+                            
                             tasks = []
                             for ri, rc in enumerate(a_rows):
                                 for ci2 in range(c_size):
@@ -939,11 +944,15 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                                     if cidx >= len(cids):
                                         break
                                     ct = rc[ci2] if ci2 < len(rc) else ""
-                                    if not ct:
-                                        continue
                                     tasks.append((cids[cidx], ct, ri == 0))
-                            with ThreadPoolExecutor(max_workers=5) as pool:
-                                pool.map(fill_cell, tasks)
+                            
+                            # 分批处理：每批最多 num_workers 个任务并发
+                            for batch_start in range(0, len(tasks), num_workers):
+                                batch = tasks[batch_start:batch_start + num_workers]
+                                with ThreadPoolExecutor(max_workers=num_workers) as pool:
+                                    futures = [pool.submit(fill_cell, task) for task in batch]
+                                    for future in futures:
+                                        future.result()  # 等待当前批次完成
                         time.sleep(0.5)
                         return True
 
