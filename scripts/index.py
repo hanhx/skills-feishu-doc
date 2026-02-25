@@ -207,10 +207,30 @@ def api_call(method, path, access_token, body=None, retries=3):
     return {"code": 429, "msg": "rate limited after retries"}
 
 
-def check_resp(resp, action_name):
+def check_resp(resp, action_name, auto_retry_login=False):
     code = resp.get("code", -1)
     if code != 0:
         msg = resp.get("msg") or resp.get("message") or "未知错误"
+        
+        # Token 过期或无效，尝试自动登录
+        if code in (99991663, 99991664) and auto_retry_login:
+            print(f"🔑 检测到 Token 问题 (code={code})，自动启动登录流程...", file=sys.stderr)
+            print("", file=sys.stderr)
+            import subprocess
+            login_script = os.path.join(SCRIPT_DIR, "login.py")
+            try:
+                # 先退出登录清除旧 token
+                subprocess.run(["python3", login_script, "logout"], check=False, capture_output=True)
+                # 启动登录流程（会打开浏览器）
+                result = subprocess.run(["python3", login_script], check=True, capture_output=False)
+                if result.returncode == 0:
+                    print("", file=sys.stderr)
+                    print("✅ 登录完成，请重新执行命令", file=sys.stderr)
+                    sys.exit(0)
+            except subprocess.CalledProcessError:
+                print("❌ 自动登录失败，请手动运行: python3 scripts/login.py", file=sys.stderr)
+                sys.exit(1)
+        
         print(f"❌ {action_name}失败 (code={code}): {msg}", file=sys.stderr)
         print("", file=sys.stderr)
         if code in (99991668, 99991672, 99991679, 1770032):
@@ -527,7 +547,7 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
     if action == "read":
         # 获取纯文本
         resp = api_call("GET", f"/docx/v1/documents/{doc_token}/raw_content", access_token)
-        data = check_resp(resp, "获取文档内容")
+        data = check_resp(resp, "获取文档内容", auto_retry_login=True)
         content = data.get("content", "")
 
         # 获取 blocks 并转为 markdown（支持翻页）
@@ -587,7 +607,7 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
     elif action == "clear":
         page_block_id = doc_token
         clear_resp = api_call("GET", f"/docx/v1/documents/{doc_token}/blocks/{page_block_id}", access_token)
-        clear_data = check_resp(clear_resp, "获取文档块")
+        clear_data = check_resp(clear_resp, "获取文档块", auto_retry_login=True)
         clear_children = clear_data.get("block", {}).get("children", [])
         # 清空标题
         api_call(
@@ -647,7 +667,7 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                             access_token,
                             {"children": batch, "index": -1},
                         )
-                        check_resp(resp, "写入文档")
+                        check_resp(resp, "写入文档", auto_retry_login=True)
                         counter[0] += len(batch)
                         time.sleep(0.5)
                     cb = {"block_type": 19, "callout": {"background_color": 15}}
@@ -657,7 +677,7 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                         access_token,
                         {"children": [cb], "index": -1},
                     )
-                    cd = check_resp(cr, "创建引用块")
+                    cd = check_resp(cr, "创建引用块", auto_retry_login=True)
                     counter[0] += 1
                     ci = cd.get("children", [{}])[0].get("block_id", "")
                     if ci:
@@ -680,7 +700,7 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                     access_token,
                     {"children": batch, "index": -1},
                 )
-                check_resp(resp, "写入文档")
+                check_resp(resp, "写入文档", auto_retry_login=True)
                 counter[0] += len(batch)
                 time.sleep(0.5)
 
