@@ -675,6 +675,7 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                         check_resp(resp, "写入文档", auto_retry_login=True)
                         counter[0] += len(batch)
                         time.sleep(0.5)
+                    # 创建空 callout 块
                     cb = {"block_type": 19, "callout": {"background_color": 15}}
                     cr = api_call(
                         "POST",
@@ -684,14 +685,25 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                     )
                     cd = check_resp(cr, "创建引用块", auto_retry_login=True)
                     counter[0] += 1
-                    ci = cd.get("children", [{}])[0].get("block_id", "")
-                    if ci:
+                    
+                    # 获取 callout 的 block_id 和自动创建的子块
+                    callout_id = cd.get("children", [{}])[0].get("block_id", "")
+                    if callout_id:
+                        # 获取 callout 的子块列表
+                        get_resp = api_call("GET", f"/docx/v1/documents/{doc_token}/blocks/{callout_id}", access_token)
+                        auto_children = get_resp.get("data", {}).get("block", {}).get("children", [])
+                        
+                        # 删除所有自动创建的空子块
+                        for child_id in auto_children:
+                            api_call("DELETE", f"/docx/v1/documents/{doc_token}/blocks/{child_id}", access_token)
+                        
+                        # 添加我们的内容块
                         cc = {"block_type": 2, "text": {"elements": make_text_elements(blk["_callout_text"])}}
                         api_call(
                             "POST",
-                            f"/docx/v1/documents/{doc_token}/blocks/{ci}/children",
+                            f"/docx/v1/documents/{doc_token}/blocks/{callout_id}/children",
                             access_token,
-                            {"children": [cc], "index": 0},
+                            {"children": [cc], "index": -1},
                         )
                     time.sleep(0.3)
                 else:
