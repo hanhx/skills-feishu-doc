@@ -693,18 +693,28 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                         get_resp = api_call("GET", f"/docx/v1/documents/{doc_token}/blocks/{callout_id}", access_token)
                         auto_children = get_resp.get("data", {}).get("block", {}).get("children", [])
                         
-                        # 删除所有自动创建的空子块
-                        for child_id in auto_children:
-                            api_call("DELETE", f"/docx/v1/documents/{doc_token}/blocks/{child_id}", access_token)
-                        
-                        # 添加我们的内容块
-                        cc = {"block_type": 2, "text": {"elements": make_text_elements(blk["_callout_text"])}}
-                        api_call(
-                            "POST",
-                            f"/docx/v1/documents/{doc_token}/blocks/{callout_id}/children",
-                            access_token,
-                            {"children": [cc], "index": -1},
-                        )
+                        # 如果有自动创建的子块，直接更新第一个子块的内容，删除其余的
+                        if auto_children:
+                            first_child_id = auto_children[0]
+                            # 更新第一个子块的内容
+                            api_call(
+                                "PATCH",
+                                f"/docx/v1/documents/{doc_token}/blocks/{first_child_id}",
+                                access_token,
+                                {"update_text_elements": {"elements": make_text_elements(blk["_callout_text"])}},
+                            )
+                            # 删除其余的空子块
+                            for child_id in auto_children[1:]:
+                                api_call("DELETE", f"/docx/v1/documents/{doc_token}/blocks/{child_id}", access_token)
+                        else:
+                            # 如果没有自动创建的子块，添加我们的内容块
+                            cc = {"block_type": 2, "text": {"elements": make_text_elements(blk["_callout_text"])}}
+                            api_call(
+                                "POST",
+                                f"/docx/v1/documents/{doc_token}/blocks/{callout_id}/children",
+                                access_token,
+                                {"children": [cc], "index": -1},
+                            )
                     time.sleep(0.3)
                 else:
                     pending_buf.append(blk)
