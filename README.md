@@ -123,7 +123,7 @@ python3 scripts/login.py logout && python3 scripts/login.py
 ### App ID + App Secret
 
 - **跟应用绑定，不跟个人绑定**。同一个飞书组织内的成员可以共用同一对 app_id / app_secret。
-- 仅凭 app_id + app_secret 只能获取 `tenant_access_token`（应用身份），只能访问**明确分享给应用的文档**，无法访问任何人的私人文档。
+- app_id + app_secret 用于启动 OAuth 授权流程，**本身不能直接访问任何文档**。
 - 建议：**不要提交到公开仓库**，通过 `.gitignore` 忽略 `assets/.feishu` 文件。
 
 ### User Access Token
@@ -141,7 +141,7 @@ python3 scripts/login.py logout && python3 scripts/login.py
 
 | 凭证 | 能做什么 | 泄露风险 |
 |------|---------|---------|
-| app_id + app_secret | 获取应用 token，仅访问授权给应用的文档 | 低 |
+| app_id + app_secret | 启动 OAuth 授权流程，本身不能访问文档 | 低 |
 | user_access_token | 以个人身份读写文档（2h 过期） | 中，但需本人授权才能获取 |
 | refresh_token | 刷新出新的 access_token（30 天有效） | 高，泄露等于身份冒用 |
 
