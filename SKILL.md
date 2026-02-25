@@ -17,26 +17,30 @@ description: Reads and writes Feishu/Lark wiki and docx documents via Open API (
 
 ## 调用方式
 
-调用与 SKILL.md 同级目录下的 `scripts/`：
+在 `feishu-doc` skill 根目录执行以下命令（`SKILL.md` 与 `scripts/` 同级）。
+
+如不在 skill 根目录，可先进入目录：
+- Windsurf: `cd ~/.codeium/windsurf/skills/feishu-doc`
+- Cursor: `cd ~/.cursor/skills/feishu-doc`
 
 **读取文档**：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/index.py read "<Feishu_URL>"
+python3 scripts/index.py read "<Feishu_URL>"
 ```
 
 **清空文档**（删除所有内容，写入前需先确认再清空）：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/index.py clear "<Feishu_URL>"
+python3 scripts/index.py clear "<Feishu_URL>"
 ```
 
 **写入文档**（全量写入，第一个 H1 设为文档标题）：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/index.py write "<Feishu_URL>" "<content_file>"
+python3 scripts/index.py write "<Feishu_URL>" "<content_file>"
 ```
 
 **追加内容**（在文档末尾追加，不修改标题和已有内容）：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/index.py append "<Feishu_URL>" "<content_file>"
+python3 scripts/index.py append "<Feishu_URL>" "<content_file>"
 ```
 
 ## URL Format
@@ -63,7 +67,7 @@ cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/index.py append "<Fe
 
 **首次登录**：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py
+python3 scripts/login.py
 ```
 浏览器会自动打开飞书授权页，点击授权后 token 自动保存。
 
@@ -72,12 +76,12 @@ cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py
 
 **退出登录**：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout
+python3 scripts/login.py logout
 ```
 
 **重新登录**（token 过期或切换账号）：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout && python3 scripts/login.py
+python3 scripts/login.py logout && python3 scripts/login.py
 ```
 
 ### 方式2：应用授权

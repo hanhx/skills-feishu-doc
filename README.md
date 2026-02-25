@@ -30,7 +30,9 @@ ln -s /path/to/feishu-doc ~/.codeium/windsurf/skills/feishu-doc
 git clone https://github.com/hanhx/feishu-doc.git ~/.cursor/skills/feishu-doc
 ```
 
-> 不同 IDE 的 skills 目录可能不同，请参考对应 IDE 的文档。
+安装完成后，Cursor Agent 也会自动识别 `SKILL.md` 并加载该 skill。
+
+> 不同 IDE 版本的 skills 目录可能不同，请以对应 IDE 官方文档为准。
 
 ---
 
@@ -103,10 +105,13 @@ app_secret=xxxx
 
 ### 首次登录
 
-在终端执行：
+在 `feishu-doc` skill 根目录执行：
+
+- Windsurf 常见路径：`~/.codeium/windsurf/skills/feishu-doc`
+- Cursor 常见路径：`~/.cursor/skills/feishu-doc`
 
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py
+python3 scripts/login.py
 ```
 
 脚本会：
@@ -122,7 +127,7 @@ cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py
 ### 退出登录
 
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout
+python3 scripts/login.py logout
 ```
 
 ### 重新登录
@@ -130,7 +135,7 @@ cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout
 token 过期或需要切换账号时：
 
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout && python3 scripts/login.py
+python3 scripts/login.py logout && python3 scripts/login.py
 ```
 
 ---
@@ -161,12 +166,12 @@ AI 助手会：
 
 ### 写入支持的格式
 
-- 标题（H1 ~ H6，第一个 H1 自动设为文档标题）
-- 代码块（自动识别 Java、SQL、JSON、Python、Go、Shell 等语言）
+- 标题（H1~H9，第一个 H1 自动设为文档标题）
+- 代码块（自动识别 Java、SQL、JSON、Python、Go、Shell、mermaid 等语言）
 - 无序列表、有序列表
 - 待办事项（`- [ ]` / `- [x]`）
-- 引用（渲染为飞书 Callout）
-- 表格（自动拆分为飞书原生表格，每个子表最多 9 行，大表格无缝支持）
+- 引用（渲染为飞书 Callout 容器）
+- 表格（自动拆分为飞书原生表格，每个子表最多 8 行数据 + 1 行表头，大表格无缝支持）
 - 分割线
 - 行内样式：**加粗**、`行内代码`、~~删除线~~、[超链接](url)
 
@@ -185,7 +190,7 @@ AI 助手会：
 
 运行重新登录命令：
 ```bash
-cd ~/.codeium/windsurf/skills/feishu-doc && python3 scripts/login.py logout && python3 scripts/login.py
+python3 scripts/login.py logout && python3 scripts/login.py
 ```
 
 ### 表格超过 9 行
