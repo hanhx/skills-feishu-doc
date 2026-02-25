@@ -910,6 +910,11 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                             break
                 continue
 
+            # 跳过空行（避免在引用块、表格后多出空白块）
+            if not line.strip():
+                i += 1
+                continue
+
             # 普通文本
             children.append(make_text_block(line))
             i += 1
