@@ -105,19 +105,20 @@ app_secret=xxxx
 
 ### 首次登录
 
-在 `feishu-doc` skill 根目录执行：
+**无需手动操作！** 当你首次使用 AI 助手读写飞书文档时，系统会自动检测到未登录并启动授权流程：
 
-- Windsurf 常见路径：`~/.codeium/windsurf/skills/feishu-doc`
-- Cursor 常见路径：`~/.cursor/skills/feishu-doc`
+1. 自动打开浏览器跳转飞书授权页
+2. 你点击「授权」后，token 自动保存到本地
+3. 终端显示 `✅ 登录成功！` 即完成
+
+如果需要手动登录，也可以在 skill 根目录执行：
 
 ```bash
 python3 scripts/login.py
 ```
 
-脚本会：
-1. 自动打开浏览器跳转飞书授权页
-2. 你点击「授权」后，token 自动保存到本地
-3. 终端显示 `✅ 登录成功！` 即完成
+> 💡 Windsurf 常见路径：`~/.codeium/windsurf/skills/feishu-doc`  
+> 💡 Cursor 常见路径：`~/.cursor/skills/feishu-doc`
 
 ### Token 有效期
 
@@ -132,7 +133,9 @@ python3 scripts/login.py logout
 
 ### 重新登录
 
-token 过期或需要切换账号时：
+**Token 过期时会自动登录！** 当检测到 token 过期，系统会自动启动登录流程，你只需在浏览器点击授权即可。
+
+如需手动重新登录或切换账号：
 
 ```bash
 python3 scripts/login.py logout && python3 scripts/login.py
