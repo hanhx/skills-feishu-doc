@@ -259,7 +259,114 @@ def extract_text(elements):
     return "".join(parts)
 
 
-def block_to_md(block):
+def extract_block_text(block):
+    for key in block:
+        if isinstance(block[key], dict) and "elements" in block[key]:
+            return extract_text(block[key].get("elements", []))
+    return ""
+
+
+def get_block_text_by_id(block_id, block_map, visited=None):
+    if visited is None:
+        visited = set()
+    if not block_id or block_id in visited:
+        return ""
+    visited.add(block_id)
+
+    block = block_map.get(block_id, {})
+    if not block:
+        return ""
+
+    # 优先取当前块文本；无文本时递归拼接子块文本
+    text = extract_block_text(block).strip()
+    if text:
+        return text
+
+    child_texts = []
+    for child_id in block.get("children", []) or []:
+        child_text = get_block_text_by_id(child_id, block_map, visited)
+        if child_text:
+            child_texts.append(child_text)
+    return "\n".join(child_texts)
+
+
+def collect_descendant_ids(block_id, block_map, visited=None):
+    if visited is None:
+        visited = set()
+    if not block_id or block_id in visited:
+        return set()
+    visited.add(block_id)
+
+    block = block_map.get(block_id, {})
+    descendants = set()
+    for child_id in block.get("children", []) or []:
+        descendants.add(child_id)
+        descendants.update(collect_descendant_ids(child_id, block_map, visited))
+    return descendants
+
+
+def table_block_to_md(block, block_map):
+    table = block.get("table", {})
+    prop = table.get("property", {}) if isinstance(table, dict) else {}
+
+    row_size = int(prop.get("row_size", 0) or 0)
+    col_size = int(prop.get("column_size", 0) or 0)
+    cell_ids = table.get("cells", []) if isinstance(table, dict) else []
+
+    if row_size <= 0 or col_size <= 0 or not cell_ids:
+        return "[表格]"
+
+    row_count = min(row_size, max(1, len(cell_ids) // col_size))
+    matrix = [["" for _ in range(col_size)] for _ in range(row_count)]
+
+    total_cells = min(len(cell_ids), row_count * col_size)
+    for idx in range(total_cells):
+        r = idx // col_size
+        c = idx % col_size
+        text = get_block_text_by_id(cell_ids[idx], block_map).strip()
+        text = text.replace("\n", "<br>").replace("|", "\\|")
+        matrix[r][c] = text
+
+    if not matrix:
+        return "[表格]"
+
+    header = matrix[0]
+    separator = ["---"] * col_size
+    lines = [
+        "| " + " | ".join(header) + " |",
+        "| " + " | ".join(separator) + " |",
+    ]
+    for row in matrix[1:]:
+        lines.append("| " + " | ".join(row) + " |")
+    return "\n".join(lines)
+
+
+def callout_block_to_md(block, block_map):
+    texts = []
+
+    # 优先从子块读取（避免与 elements 重复）
+    children = block.get("children", []) or []
+    if children:
+        for child_id in children:
+            child_text = get_block_text_by_id(child_id, block_map).strip()
+            if child_text:
+                texts.append(child_text)
+    else:
+        # 无子块时才从 callout.elements 读取
+        callout = block.get("callout", {})
+        if isinstance(callout, dict) and callout.get("elements"):
+            direct = extract_text(callout.get("elements", [])).strip()
+            if direct:
+                texts.append(direct)
+
+    if not texts:
+        return None
+
+    merged = "\n".join(texts)
+    return "\n".join([f"> {ln}" if ln else ">" for ln in merged.split("\n")])
+
+
+def block_to_md(block, block_map=None):
     btype = block.get("block_type", 0)
     if btype == 1:  # page
         page = block.get("page", {})
@@ -304,19 +411,16 @@ def block_to_md(block):
         return "---"
     elif btype == 27:  # image
         return "[图片]"
-    elif btype == 22:  # table
-        return "[表格]"
+    elif btype == 22 or (btype == 31 and isinstance(block.get("table"), dict)):  # table
+        return table_block_to_md(block, block_map or {})
     elif btype == 18:  # bitable
         return "[多维表格]"
     elif btype == 31:  # grid
         return "[分栏]"
     elif btype == 19:  # callout
-        return "[高亮块]"
+        return callout_block_to_md(block, block_map or {})
     else:
-        for key in block:
-            if isinstance(block[key], dict) and "elements" in block[key]:
-                return extract_text(block[key]["elements"])
-        return ""
+        return extract_block_text(block)
 
 
 def parse_inline_styles(text):
@@ -442,9 +546,29 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
             if not page_token:
                 break
 
+        block_map = {it.get("block_id"): it for it in items if it.get("block_id")}
+        skip_block_ids = set()
+        for it in items:
+            btype = it.get("block_type", 0)
+            # Skip table cell descendants
+            is_table = btype == 22 or (btype == 31 and isinstance(it.get("table"), dict))
+            if is_table:
+                table = it.get("table", {})
+                for cell_id in table.get("cells", []) or []:
+                    skip_block_ids.add(cell_id)
+                    skip_block_ids.update(collect_descendant_ids(cell_id, block_map))
+            # Skip callout children to avoid duplication
+            if btype == 19:
+                for child_id in it.get("children", []) or []:
+                    skip_block_ids.add(child_id)
+                    skip_block_ids.update(collect_descendant_ids(child_id, block_map))
+
         md_lines = []
         for item in items:
-            line = block_to_md(item)
+            block_id = item.get("block_id", "")
+            if block_id and block_id in skip_block_ids:
+                continue
+            line = block_to_md(item, block_map)
             if line is not None:
                 md_lines.append(line)
 
@@ -671,7 +795,7 @@ def process(action, doc_url, access_token, doc_type, token, content_file=""):
                 continue
 
             # 表格 → 飞书原生表格
-            if stripped.startswith("|") and i + 1 < len(lines) and re.match(r"^\s*\|[-:|]+", lines[i + 1]):
+            if stripped.startswith("|") and i + 1 < len(lines) and re.match(r"^\s*\|[\s\-:|]+\|?\s*$", lines[i + 1]):
                 table_lines = []
                 while i < len(lines) and lines[i].strip().startswith("|"):
                     table_lines.append(lines[i].strip())
