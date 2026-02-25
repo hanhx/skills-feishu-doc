@@ -427,11 +427,16 @@ def block_to_md(block, block_map=None):
         todo = block.get("todo", {})
         done = todo.get("style", {}).get("done", False)
         return f"- [{'x' if done else ' '}] " + extract_text(todo.get("elements", []))
-    elif btype == 23:  # divider
+    elif btype == 23:  # divider (old type)
         return "---"
+    elif btype == 22:  # divider or table
+        if "divider" in block:
+            return "---"
+        else:
+            return table_block_to_md(block, block_map or {})
     elif btype == 27:  # image
         return "[图片]"
-    elif btype == 22 or (btype == 31 and isinstance(block.get("table"), dict)):  # table
+    elif btype == 31 and isinstance(block.get("table"), dict):  # table in grid
         return table_block_to_md(block, block_map or {})
     elif btype == 18:  # bitable
         return "[多维表格]"
@@ -528,7 +533,7 @@ def make_quote_block(text):
 
 
 def make_divider_block():
-    return {"block_type": 2, "text": {"elements": make_text_elements("───────────────────")}}
+    return {"block_type": 22, "divider": {}}
 
 
 def make_todo_block(text, done=False):
