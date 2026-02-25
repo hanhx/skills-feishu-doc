@@ -32,7 +32,9 @@ git clone https://github.com/hanhx/feishu-doc.git ~/.cursor/skills/feishu-doc
 
 安装完成后，Cursor Agent 也会自动识别 `SKILL.md` 并加载该 skill。
 
-> 不同 IDE 版本的 skills 目录可能不同，请以对应 IDE 官方文档为准。
+> **💡 提示**：
+> - 不同 IDE 版本的 skills 目录可能不同，请以对应 IDE 官方文档为准
+> - 如果下载 zip 包，解压后文件夹名为 `feishu-doc-main`，需重命名为 `feishu-doc` 或创建软链接
 
 ---
 
