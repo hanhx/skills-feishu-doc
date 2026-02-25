@@ -3,3 +3,10 @@
 assets/.token_cache
 assets/.user_token_cache
 assets/.feishu
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
