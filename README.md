@@ -48,14 +48,14 @@ git clone https://github.com/hanhx/feishu-doc.git ~/.cursor/skills/feishu-doc
 
 **方式1：环境变量（推荐）**
 
-在 `~/.bash_profile`（或 `~/.zshrc`）中添加：
+在 `~/.zshrc`（Mac 默认）或 `~/.bash_profile` 中添加：
 
 ```bash
 export FEISHU_APP_ID=cli_xxxx
 export FEISHU_APP_SECRET=xxxx
 ```
 
-保存后执行 `source ~/.bash_profile` 生效。
+保存后执行 `source ~/.zshrc` 生效。
 
 **方式2：配置文件**
 
