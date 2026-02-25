@@ -980,20 +980,36 @@ def main():
         sys.exit(1)
 
     if not os.path.isfile(USER_TOKEN_CACHE):
-        print("❌ 未登录，请先完成授权：", file=sys.stderr)
+        print("🔑 检测到未登录，自动启动登录流程...", file=sys.stderr)
         print("", file=sys.stderr)
-        print("   python3 scripts/login.py", file=sys.stderr)
-        print("", file=sys.stderr)
-        print("   首次使用需在浏览器中完成飞书授权，之后 30 天内无需重复登录。", file=sys.stderr)
-        print("", file=sys.stderr)
-        print("📖 完整配置指南: https://github.com/hanhx/feishu-doc#readme", file=sys.stderr)
-        sys.exit(1)
+        import subprocess
+        login_script = os.path.join(SCRIPT_DIR, "login.py")
+        try:
+            result = subprocess.run(["python3", login_script], check=True, capture_output=False)
+            if result.returncode == 0:
+                print("", file=sys.stderr)
+                print("✅ 登录完成，请重新执行命令", file=sys.stderr)
+                sys.exit(0)
+        except subprocess.CalledProcessError:
+            print("❌ 自动登录失败，请手动运行: python3 scripts/login.py", file=sys.stderr)
+            sys.exit(1)
 
     access_token = get_user_access_token(app_id, app_secret)
     if not access_token:
-        print("❌ 获取 access_token 失败，请重新登录：", file=sys.stderr)
-        print("   python3 scripts/login.py logout && python3 scripts/login.py", file=sys.stderr)
-        sys.exit(1)
+        print("🔑 Token 获取失败，自动启动登录流程...", file=sys.stderr)
+        print("", file=sys.stderr)
+        import subprocess
+        login_script = os.path.join(SCRIPT_DIR, "login.py")
+        try:
+            subprocess.run(["python3", login_script, "logout"], check=False, capture_output=True)
+            result = subprocess.run(["python3", login_script], check=True, capture_output=False)
+            if result.returncode == 0:
+                print("", file=sys.stderr)
+                print("✅ 登录完成，请重新执行命令", file=sys.stderr)
+                sys.exit(0)
+        except subprocess.CalledProcessError:
+            print("❌ 自动登录失败，请手动运行: python3 scripts/login.py", file=sys.stderr)
+            sys.exit(1)
 
     # 执行操作
     process(action, doc_url, access_token, doc_type, token, content_file)
