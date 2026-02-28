@@ -1,6 +1,6 @@
 # feishu-doc 使用说明
 
-让 AI IDE（如 Windsurf、Cursor 等）直接在终端读写飞书文档，无需打开浏览器。
+让 AI IDE（如 OpenCode、Claude Code、Windsurf、Cursor 等）直接在终端读写飞书文档，无需打开浏览器。
 
 **下载地址**：https://github.com/hanhx/feishu-doc
 
