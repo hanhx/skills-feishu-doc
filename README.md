@@ -24,16 +24,6 @@ AI 会自动识别当前 IDE 并安装到正确的目录。
 
 根据你使用的 AI IDE，选择对应的命令：
 
-**Windsurf**
-```bash
-git clone https://github.com/hanhx/feishu-doc.git ~/.codeium/windsurf/skills/feishu-doc
-```
-
-**Cursor**
-```bash
-git clone https://github.com/hanhx/feishu-doc.git ~/.cursor/skills/feishu-doc
-```
-
 **OpenCode**
 ```bash
 git clone https://github.com/hanhx/feishu-doc.git ~/.opencode/skills/feishu-doc
@@ -44,6 +34,16 @@ git clone https://github.com/hanhx/feishu-doc.git ~/.opencode/skills/feishu-doc
 git clone https://github.com/hanhx/feishu-doc.git ~/.claude/skills/feishu-doc
 ```
 
+**Windsurf**
+```bash
+git clone https://github.com/hanhx/feishu-doc.git ~/.codeium/windsurf/skills/feishu-doc
+```
+
+**Cursor**
+```bash
+git clone https://github.com/hanhx/feishu-doc.git ~/.cursor/skills/feishu-doc
+```
+
 安装完成后，AI IDE 会自动识别 `SKILL.md` 并加载该 skill。
 
 #### 方式 3：软链接
@@ -51,17 +51,17 @@ git clone https://github.com/hanhx/feishu-doc.git ~/.claude/skills/feishu-doc
 如果你已经克隆到其他位置，可以创建软链接：
 
 ```bash
-# Windsurf
-ln -s /path/to/feishu-doc ~/.codeium/windsurf/skills/feishu-doc
-
-# Cursor
-ln -s /path/to/feishu-doc ~/.cursor/skills/feishu-doc
-
 # OpenCode
 ln -s /path/to/feishu-doc ~/.opencode/skills/feishu-doc
 
 # Claude Code
 ln -s /path/to/feishu-doc ~/.claude/skills/feishu-doc
+
+# Windsurf
+ln -s /path/to/feishu-doc ~/.codeium/windsurf/skills/feishu-doc
+
+# Cursor
+ln -s /path/to/feishu-doc ~/.cursor/skills/feishu-doc
 ```
 
 > **💡 提示**：
@@ -190,7 +190,7 @@ python3 scripts/login.py logout && python3 scripts/login.py
 ### 1. 创建应用
 
 1. 打开 [飞书开放平台](https://open.feishu.cn/app)，登录后点击「创建企业自建应用」
-2. 填写应用名称（如 `Windsurf Doc`），创建完成后进入应用详情页
+2. 填写应用名称（如 `feishu-doc` 或 `AI IDE Doc`），创建完成后进入应用详情页
 3. 记录 **App ID** 和 **App Secret**
 
 ### 2. 开通权限
@@ -228,6 +228,8 @@ http://127.0.0.1:9999/callback
 python3 scripts/login.py
 ```
 
+> 💡 OpenCode 常见路径：`~/.opencode/skills/feishu-doc`  
+> 💡 Claude Code 常见路径：`~/.claude/skills/feishu-doc`  
 > 💡 Windsurf 常见路径：`~/.codeium/windsurf/skills/feishu-doc`  
 > 💡 Cursor 常见路径：`~/.cursor/skills/feishu-doc`
 
