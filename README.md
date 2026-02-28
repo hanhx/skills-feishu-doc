@@ -10,29 +10,59 @@
 
 ### 1. 安装
 
-将项目克隆（或软链接）到 AI IDE 的 skills 目录即可。
+支持三种安装方式：**AI 安装（推荐）**、**手动安装**、**软链接**。
 
-### Windsurf
+#### 方式 1：AI 安装（推荐）
 
+直接在 AI IDE 中告诉 AI 助手：
+
+> "帮我安装 feishu-doc skill，仓库地址是 https://github.com/hanhx/feishu-doc"
+
+AI 会自动识别当前 IDE 并安装到正确的目录。
+
+#### 方式 2：手动安装
+
+根据你使用的 AI IDE，选择对应的命令：
+
+**Windsurf**
 ```bash
 git clone https://github.com/hanhx/feishu-doc.git ~/.codeium/windsurf/skills/feishu-doc
 ```
 
-或者如果你已经克隆到其他位置，可以用软链接：
-
-```bash
-ln -s /path/to/feishu-doc ~/.codeium/windsurf/skills/feishu-doc
-```
-
-安装完成后，Windsurf 的 Cascade 会自动识别 `SKILL.md` 并加载该 skill。
-
-### Cursor
-
+**Cursor**
 ```bash
 git clone https://github.com/hanhx/feishu-doc.git ~/.cursor/skills/feishu-doc
 ```
 
-安装完成后，Cursor Agent 也会自动识别 `SKILL.md` 并加载该 skill。
+**OpenCode**
+```bash
+git clone https://github.com/hanhx/feishu-doc.git ~/.opencode/skills/feishu-doc
+```
+
+**Claude Code**
+```bash
+git clone https://github.com/hanhx/feishu-doc.git ~/.claude/skills/feishu-doc
+```
+
+安装完成后，AI IDE 会自动识别 `SKILL.md` 并加载该 skill。
+
+#### 方式 3：软链接
+
+如果你已经克隆到其他位置，可以创建软链接：
+
+```bash
+# Windsurf
+ln -s /path/to/feishu-doc ~/.codeium/windsurf/skills/feishu-doc
+
+# Cursor
+ln -s /path/to/feishu-doc ~/.cursor/skills/feishu-doc
+
+# OpenCode
+ln -s /path/to/feishu-doc ~/.opencode/skills/feishu-doc
+
+# Claude Code
+ln -s /path/to/feishu-doc ~/.claude/skills/feishu-doc
+```
 
 > **💡 提示**：
 > - 不同 IDE 版本的 skills 目录可能不同，请以对应 IDE 官方文档为准
